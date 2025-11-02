@@ -1,12 +1,14 @@
 import { ChartLine, Cloud, History, Settings, User } from 'lucide-react';
+import { Link, useLocation } from '@tanstack/react-router';
+
 
 const SideBar = () => {
-
+    const { pathname } = useLocation();
     const menuItems = [
         { name: 'Dashboard', icon: <ChartLine size={20} />, link: '/' },
         { name: 'History', icon: <History size={20} />, link: '/history' },
         { name: 'Settings', icon: <Settings size={20} />, link: '/settings' },
-        { name: 'Account', icon: <User size={20} />, link: './account' },
+        { name: 'Account', icon: <User size={20} />, link: '/account' },
     ];
 
     return (
@@ -28,15 +30,34 @@ const SideBar = () => {
                         </span>
                     </h1>
                 </div>
-                <ul className="space-y-5 font-medium">
-                    {menuItems.map((item) => (
-                        <li key={item.name}>
-                            <a href={item.link} className="flex items-center p-2 text-gray-900 rounded-lg hover:bg-blue-50 hover:text-blue-600">
-                                {item.icon}
-                                <span className="ml-3">{item.name}</span>
-                            </a>
-                        </li>
-                    ))}
+                <ul className="space-y-2 font-medium">
+                    {menuItems.map((item) => {
+                        const isActive = pathname === item.link;
+
+                        return (
+                            <li key={item.name}>
+                                <Link
+                                    to={item.link}
+                                    className={`
+                                        flex items-center p-3 rounded-xl transition-colors
+                                        ${isActive
+                                            ? 'bg-blue-600 text-white shadow-md' // Styl aktywnego linku
+                                            : 'text-gray-700 hover:bg-blue-50 hover:text-blue-600' // Styl nieaktywnego linku
+                                        }
+                                    `}
+                                >
+                                    {/* Upewnienie się, że ikona ma odpowiedni kolor w aktywnym stanie */}
+                                    <span className={`mr-3 ${isActive ? 'text-white' : 'text-gray-500 group-hover:text-blue-600'}`}>
+                                        {item.icon}
+                                    </span>
+
+                                    <span className="font-semibold">
+                                        {item.name}
+                                    </span>
+                                </Link>
+                            </li>
+                        )
+                    })}
                 </ul>
             </div>
         </aside>
