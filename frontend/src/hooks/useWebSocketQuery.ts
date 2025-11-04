@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 export interface SensorData {
     temperature: number
@@ -8,7 +8,6 @@ export interface SensorData {
     timestamp: string
 }
 
-// 🔹 Typ całego hooka (jego stanu)
 export interface WebSocketState {
     data: SensorData | null
     connected: boolean
@@ -18,57 +17,95 @@ export interface WebSocketState {
 
 export function useWebSocketQuery(url: string): WebSocketState {
     const [data, setData] = useState<SensorData | null>(null)
-    const [connected, setConnected] = useState<boolean>(false)
-    const [loading, setLoading] = useState<boolean>(true)
+    const [connected, setConnected] = useState(false)
+    const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
 
+    const wsRef = useRef<WebSocket | null>(null)
+    const timeoutRef = useRef<NodeJS.Timeout | null>(null)
+    const reconnectRef = useRef<NodeJS.Timeout | null>(null)
+    const lastMessageTime = useRef<number>(0)
+    const hasEverConnected = useRef<boolean>(false) // ✅ NOWA FLAGA
+
     useEffect(() => {
-        setLoading(true)
-        setError(null)
+        function connect() {
+            const ws = new WebSocket(url)
+            wsRef.current = ws
 
-        const ws = new WebSocket(url)
+            console.log('🔄 Łączenie z WebSocketem...')
 
-        ws.onopen = () => {
-            console.log('✅ Połączono z WebSocketem')
-            setConnected(true)
-            setError(null)
-        }
+            ws.onopen = () => {
+                console.log('✅ Połączono z WebSocketem')
+                hasEverConnected.current = true // ✅ zapamiętaj, że kiedyś się udało
+                setConnected(true)
+                setLoading(true)
+                setError(null)
+                lastMessageTime.current = Date.now()
 
-        ws.onmessage = (event) => {
-            try {
-                const message = JSON.parse(event.data)
-                if (message.type === 'sensor_update') {
-                    const payload: SensorData = {
-                        ...message.payload,
-                        timestamp: message.timestamp,
+                if (timeoutRef.current) clearTimeout(timeoutRef.current)
+                timeoutRef.current = setInterval(() => {
+                    if (Date.now() - lastMessageTime.current > 10000) {
+                        setError('Brak danych z serwera (10s).')
+                        setLoading(false)
                     }
-                    setData(payload)
+                }, 3000)
+            }
 
-                    if (loading) setLoading(false)
+            ws.onmessage = (event) => {
+                try {
+                    const msg = JSON.parse(event.data)
+                    if (msg.type === 'sensor_update') {
+                        setData({ ...msg.payload, timestamp: msg.timestamp })
+                        lastMessageTime.current = Date.now()
+                        setError(null)
+                        setLoading(false)
+                    } else if (msg.type === 'welcome') {
+                        console.log('👋 Serwer mówi:', msg.message)
+                    } else {
+                        console.log('📦 Inna wiadomość:', msg)
+                    }
+                } catch {
+                    setError('Błąd parsowania danych z serwera.')
                 }
-            } catch (err) {
-                console.error('Błąd parsowania danych:', err)
-                setError('Błąd parsowania danych: Otrzymano nieprawidłowy format JSON.')
+            }
+
+            ws.onerror = (err) => {
+                console.error('⚠️ Błąd WebSocket:', err)
+                setConnected(false)
+                // ❗ Nie pokazuj błędu, jeśli to pierwsze połączenie jeszcze nie zdążyło się udać
+                if (hasEverConnected.current) {
+                    setError('Nie udało się połączyć z serwerem WebSocket.')
+                }
+            }
+
+            ws.onclose = () => {
+                console.log('❌ Połączenie WebSocket zakończone.')
+                setConnected(false)
+                setLoading(false)
+
+                // ✅ Pokaż błąd tylko jeśli wcześniej było połączenie
+                if (hasEverConnected.current) {
+                    setError('Połączenie WebSocket zamknięte.')
+                }
+
+                if (timeoutRef.current) clearInterval(timeoutRef.current)
+
+                if (!reconnectRef.current) {
+                    reconnectRef.current = setTimeout(() => {
+                        console.log('🔁 Próba ponownego połączenia...')
+                        reconnectRef.current = null
+                        connect()
+                    }, 5000)
+                }
             }
         }
 
-        ws.onerror = (e) => {
-            console.error('⚠️ Wystąpił błąd WebSocket:', e)
-            setError('Błąd połączenia WebSocket. Sprawdź adres i serwer.')
-            setLoading(false)
-            setConnected(false)
-        }
-
-        ws.onclose = () => {
-            console.warn('❌ Rozłączono z WebSocketem')
-            setConnected(false)
-            setLoading(false)
-        }
+        connect()
 
         return () => {
-            ws.close()
-            setConnected(false)
-            setLoading(true)
+            if (wsRef.current) wsRef.current.close()
+            if (timeoutRef.current) clearInterval(timeoutRef.current)
+            if (reconnectRef.current) clearTimeout(reconnectRef.current)
         }
     }, [url])
 

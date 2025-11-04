@@ -1,54 +1,73 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useWebSocketQuery } from '@/hooks/useWebSocketQuery'
+import { CalendarSync } from 'lucide-react';
+import SensorDataCard from '@/components/SensorDataCard/SensorDaraCard'
+import SkeletonLoader from '@/components/SensorDataCard/SkeletonLoader'
+import { useWebSocket } from '@/context/WebSocketContext'
 
 export const Route = createFileRoute('/')({
   component: App,
 })
 
-const WS_URL = 'ws://localhost:3000'
-
 function App() {
-  const { data, connected, loading, error } = useWebSocketQuery(WS_URL)
+  const { data, loading, error, connected } = useWebSocket()
 
-  let statusMessage = "Oczekiwanie na dane z czujników...";
-
-  if (loading) {
-    statusMessage = "Łączenie i oczekiwanie na pierwszy pakiet danych...";
-  } else if (error) {
-    statusMessage = `🚨 Błąd: ${error}. Spróbuj ponownie.`;
-  }
-
-  const isDataAvailable = data && Object.keys(data).length > 0;
+  console.log(connected)
 
   return (
-    <div className=" min-h-screen flex flex-col items-center justify-center bg-gray-50 text-white p-8">
-      <h1 className="text-3xl font-bold mb-4">📡 Sensor Dashboard</h1>
-
-      {/* Wskaźnik Połączenia */}
-      <div
-        className={`mb-6 px-4 py-2 rounded-full font-semibold ${connected ? 'bg-green-600' : 'bg-red-600'
-          }`}
-      >
-        {connected ? 'Połączono z serwerem' : 'Brak połączenia'}
+    <div className="bg-gray-50 p-10 ">
+      <div className="flex justify-end mb-6">
+        {data && (
+          <div className="flex items-center gap-2 text-sm text-gray-600 bg-white border border-gray-200 px-4 py-2 rounded-xl shadow-sm">
+            <CalendarSync className="w-4 h-4 text-blue-500" />
+            <span className="text-gray-500">Last update:</span>
+            <span className="font-medium text-gray-800">
+              {new Date(data.timestamp || Date.now()).toLocaleString('pl-PL')}
+            </span>
+          </div>
+        )}
       </div>
 
-      {isDataAvailable ? (
-        <div className="bg-white text-black rounded-2xl shadow-xl p-6 w-[90%] max-w-md">
-          {Object.entries(data).map(([key, value]) => (
-            <div
-              key={key}
-              className="flex justify-between py-2 border-b border-gray-200 last:border-b-0"
-            >
-              <span className="font-semibold capitalize">{key}</span>
-              <span className="font-mono text-gray-700">{String(value)}</span>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {!loading && error && (
+            <div className="col-span-full text-red-500 font-bold flex items-center justify-center bg-red-100 rounded-xl h-40 shadow-lg">
+              ❌ {error}
             </div>
-          ))}
+          )}
+
+          {loading && !data && (
+            <>
+              <SkeletonLoader />
+              <SkeletonLoader />
+              <SkeletonLoader />
+              <SkeletonLoader />
+            </>
+          )}
+
+          {!loading && !error && data && (
+            <>
+              <SensorDataCard data={`🌡️ Temperatura: ${data.temperature} °C`} />
+              <SensorDataCard data={`💧 Wilgotność: ${data.humidity} %`} />
+              <SensorDataCard data={`🧭 Ciśnienie: ${data.pressure} hPa`} />
+              <SensorDataCard data={`💨 Jakość powietrza: ${data.airQuality}`} />
+            </>
+          )}
         </div>
-      ) : (
-        <p className={`text-gray-300 ${error ? 'text-red-400' : ''}`}>
-          {statusMessage}
-        </p>
-      )}
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+          <div className="h-40 bg-green-200 rounded-xl p-10 shadow-lg sm:col-span-2 flex items-center justify-center font-bold text-green-800">
+            Kafel 7 (Pełna szerokość)
+          </div>
+          <div className="h-40 bg-green-200 rounded-xl p-10 shadow-lg flex items-center justify-center font-bold text-green-800">
+            Kafel 5 (50%)
+          </div>
+          <div className="h-40 bg-green-200 rounded-xl p-10 shadow-lg flex items-center justify-center font-bold text-green-800">
+            Kafel 6 (50%)
+          </div>
+        </div>
+      </div>
     </div>
   )
 }
+
+export default App

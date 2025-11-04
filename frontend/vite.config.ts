@@ -22,4 +22,5 @@ export default defineConfig({
     port: 5173,   // 🔑 Tutaj ustawiasz domyślny port frontendu
     open: true,   // opcjonalnie: automatycznie otwiera przeglądarkę
   },
+
 })

@@ -5,5 +5,5 @@ export const Route = createFileRoute('/settings')({
 })
 
 function Settings() {
-    return <div className="mt-[100px] ml-72 p-6 text-amber-500 text-xl font-semibold">Hello "/settings"!</div>
+    return <div >Hello "/settings"!</div>
 }

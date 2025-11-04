@@ -6,7 +6,7 @@ export const Route = createFileRoute('/history')({
 
 function History() {
     return (
-        <div className="mt-[100px] ml-72 p-6 text-amber-500 text-xl font-semibold">
+        <div>
             Hello from /history 👋
         </div>
     )

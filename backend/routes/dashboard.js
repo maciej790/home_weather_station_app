@@ -1,15 +1,13 @@
 const express = require('express');
 const router = express.Router();
 
-router.get('/', (req, res) => {
-  res.send('Dashboard Home');
-});
-
 router.post('/sensor_data', (req, res) => {
   const data = req.body;
- // console.log('📡 Otrzymano dane z ESP32:', data);
-
   const wss = req.app.get('wss');
+
+  if (!data) {
+    return res.status(400).json({ error: 'No data received' });
+  }
 
   if (wss) {
     const message = JSON.stringify({

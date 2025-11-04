@@ -1,21 +1,20 @@
 const express = require('express');
-const bodyParser = require('body-parser');
 const cors = require('cors');
 const http = require('http');
 const WebSocket = require('ws');
-
 const dashboard = require('./routes/dashboard');
 
 const app = express();
 const port = 3000;
 
-app.use(cors({
-  origin: "*",
-  credentials: true
-}));
-app.use(bodyParser.json());
+// Middleware
+app.use(cors({ origin: "*", credentials: true }));
+app.use(express.json());
+
+// Routes
 app.use('/dashboard', dashboard);
 
+// Server + WebSocket
 const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
 
@@ -33,6 +32,10 @@ wss.on('connection', (ws) => {
   });
 });
 
+// Ustawiamy dostęp do WebSocketa w app
 app.set('wss', wss);
+
+// Prosty test endpoint
+app.get('/', (_, res) => res.send('Serwer działa!'));
 
 server.listen(port, () => console.log(`🚀 App listening on port ${port}!`));
