@@ -6,6 +6,7 @@ export interface SensorData {
     pressure: number
     airQuality: string
     timestamp: string
+    voltage: number
 }
 
 export interface WebSocketState {
