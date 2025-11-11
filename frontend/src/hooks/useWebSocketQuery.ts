@@ -46,7 +46,7 @@ export function useWebSocketQuery(url: string): WebSocketState {
                 if (timeoutRef.current) clearTimeout(timeoutRef.current)
                 timeoutRef.current = setInterval(() => {
                     if (Date.now() - lastMessageTime.current > 10000) {
-                        setError('Brak danych z serwera (10s).')
+                        setError('Brak danych z serwera - ponowne łączenie...') // 10s
                         setLoading(false)
                     }
                 }, 3000)
