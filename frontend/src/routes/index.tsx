@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { CalendarSync, CloudOff } from 'lucide-react'
-import SensorDataCard from '@/components/SensorDataCard/SensorDaraCard'
+import { CalendarSync, CloudOff, Droplet, Gauge, Thermometer, WindArrowDown } from 'lucide-react'
+import SensorDataCard from '@/components/SensorDataCard/SensorDataCard'
 import SkeletonCard from '@/components/SkeletonLoaders/SkeletonCard'
 import SkeletonLastUpdate from '@/components/SkeletonLoaders/SkeletonLastUpdate'
 import SkeletonChart from '@/components/SkeletonLoaders/SkeletonChart'
@@ -15,10 +15,6 @@ function App() {
 
   return (
     <div className="bg-gray-50 px-10">
-      <script src="https://cdn.tailwindcss.com"></script>
-      {/* Load Inter font for aesthetics */}
-      <style>{`@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap'); .font-sans{font-family:'Inter', sans-serif;}`}</style>
-
       {/* 🔸 Pasek z ostatnią aktualizacją */}
       <div className="flex justify-end mb-6">
         {!loading && !error && data && (
@@ -53,10 +49,10 @@ function App() {
           {/* RENDEROWANIE DANYCH KART */}
           {!loading && !error && data && (
             <>
-              <SensorDataCard type="temperature" value={data.temperature} />
-              <SensorDataCard type="humidity" value={data.humidity} />
-              <SensorDataCard type="pressure" value={data.pressure} />
-              <SensorDataCard type="airQualityVoltage" value={data.voltage} />
+              <SensorDataCard type="temperature" value={data.temperature} icon={Thermometer} />
+              <SensorDataCard type="humidity" value={data.humidity} icon={Droplet} />
+              <SensorDataCard type="pressure" value={data.pressure} icon={Gauge} />
+              <SensorDataCard type="airQualityVoltage" value={data.voltage} icon={WindArrowDown} />
             </>
           )}
         </div>

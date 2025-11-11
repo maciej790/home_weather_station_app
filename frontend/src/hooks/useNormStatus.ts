@@ -10,26 +10,26 @@ export function useNormStatus() {
 
     const SENSOR_NORMS: Record<string, SensorNorm> = {
         temperature: {
-            label: 'Temperatura',
+            label: 'Temperature',
             unit: '°C',
             optimal: [20, 23],
             warning: [18, 25],
         },
         humidity: {
-            label: 'Wilgotność',
+            label: 'Humidity',
             unit: '%',
             optimal: [40, 60],
             warning: [30, 70],
         },
         pressure: {
-            label: 'Ciśnienie',
+            label: 'Air Pressure',
             unit: 'hPa',
             optimal: [1000, 1020],
             warning: [980, 1040],
         },
         airQualityVoltage: {
-            label: 'Jakość powietrza (napięcie)',
-            unit: 'mV',
+            label: 'Air Quality Index',
+            unit: 'AQI',
             // Optymalne — bardzo dobre/dobre powietrze
             optimal: [0, 1500],
             // Ostrzeżenie — średnie
