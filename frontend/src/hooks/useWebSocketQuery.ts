@@ -9,91 +9,90 @@ export interface SensorData {
     voltage: number
 }
 
-export interface WebSocketState {
-    data: SensorData | null
-    connected: boolean
-    loading: boolean
-    error: string | null
+export interface SensorHistoryItem {
+    time: string
+    temperature: number
+    humidity: number
+    pressure: number
 }
 
-export function useWebSocketQuery(url: string): WebSocketState {
+export function useWebSocketQuery(url: string) {
     const [data, setData] = useState<SensorData | null>(null)
     const [connected, setConnected] = useState(false)
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState<string | null>(null)
+    const [history, setHistory] = useState<Array<SensorHistoryItem>>([])
 
     const wsRef = useRef<WebSocket | null>(null)
     const timeoutRef = useRef<NodeJS.Timeout | null>(null)
     const reconnectRef = useRef<NodeJS.Timeout | null>(null)
+    const hasEverConnected = useRef(false)
+
     const lastMessageTime = useRef<number>(0)
-    const hasEverConnected = useRef<boolean>(false) // ✅ NOWA FLAGA
+
+    const resetTimeout = () => {
+        if (timeoutRef.current) clearTimeout(timeoutRef.current)
+        timeoutRef.current = setInterval(() => {
+            if (hasEverConnected.current && Date.now() - lastMessageTime.current > 10000) {
+                setError('Brak danych z serwera WebSocket - sprawdź połączenie.')
+                setLoading(false)
+            }
+        }, 3000)
+    }
 
     useEffect(() => {
         function connect() {
             const ws = new WebSocket(url)
             wsRef.current = ws
 
-            console.log('🔄 Łączenie z WebSocketem...')
-
             ws.onopen = () => {
-                console.log('✅ Połączono z WebSocketem')
-                hasEverConnected.current = true // ✅ zapamiętaj, że kiedyś się udało
+                console.log('✅ WebSocket połączony')
+                hasEverConnected.current = true
                 setConnected(true)
                 setLoading(true)
                 setError(null)
                 lastMessageTime.current = Date.now()
-
-                if (timeoutRef.current) clearTimeout(timeoutRef.current)
-                timeoutRef.current = setInterval(() => {
-                    if (Date.now() - lastMessageTime.current > 10000) {
-                        setError('Brak danych z serwera - ponowne łączenie...') // 10s
-                        setLoading(false)
-                    }
-                }, 3000)
+                resetTimeout()
             }
 
             ws.onmessage = (event) => {
                 try {
                     const msg = JSON.parse(event.data)
                     if (msg.type === 'sensor_update') {
-                        setData({ ...msg.payload, timestamp: msg.timestamp })
+                        const newData: SensorData = { ...msg.payload, timestamp: msg.timestamp }
+                        setData(newData)
+                        setHistory(prev => [
+                            ...prev.slice(-49),
+                            { time: newData.timestamp, temperature: newData.temperature, humidity: newData.humidity, pressure: newData.pressure }
+                        ])
                         lastMessageTime.current = Date.now()
                         setError(null)
                         setLoading(false)
-                    } else if (msg.type === 'welcome') {
-                        console.log('👋 Serwer mówi:', msg.message)
-                    } else {
-                        console.log('📦 Inna wiadomość:', msg)
                     }
                 } catch {
-                    setError('Błąd parsowania danych z serwera.')
+                    console.warn('⚠️ Nieprawidłowe dane z serwera.')
                 }
             }
 
-            ws.onerror = (err) => {
-                console.error('⚠️ Błąd WebSocket:', err)
+            ws.onerror = () => {
                 setConnected(false)
-                // ❗ Nie pokazuj błędu, jeśli to pierwsze połączenie jeszcze nie zdążyło się udać
                 if (hasEverConnected.current) {
-                    setError('Nie udało się połączyć z serwerem WebSocket.')
+                    setError('Błąd połączenia z serwerem WebSocket.')
                 }
             }
 
             ws.onclose = () => {
-                console.log('❌ Połączenie WebSocket zakończone.')
+                console.log('❌ Połączenie WebSocket zamknięte')
                 setConnected(false)
                 setLoading(false)
-
-                // ✅ Pokaż błąd tylko jeśli wcześniej było połączenie
-                if (hasEverConnected.current) {
-                    setError('Połączenie WebSocket zamknięte.')
-                }
-
                 if (timeoutRef.current) clearInterval(timeoutRef.current)
+
+                if (hasEverConnected.current) {
+                    setError('Połączenie WebSocket zostało zamknięte.')
+                }
 
                 if (!reconnectRef.current) {
                     reconnectRef.current = setTimeout(() => {
-                        console.log('🔁 Próba ponownego połączenia...')
                         reconnectRef.current = null
                         connect()
                     }, 5000)
@@ -110,5 +109,5 @@ export function useWebSocketQuery(url: string): WebSocketState {
         }
     }, [url])
 
-    return { data, connected, loading, error }
+    return { data, connected, loading, error, history }
 }

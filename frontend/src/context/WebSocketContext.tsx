@@ -1,13 +1,27 @@
 // src/context/WebSocketContext.tsx
 import React, { createContext, useContext } from 'react'
+import type { SensorData } from '@/hooks/useWebSocketQuery';
 import { useWebSocketQuery } from '@/hooks/useWebSocketQuery'
 
-const WS_URL = 'ws://127.0.0.1:3000'
+interface SensorHistoryItem {
+    time: string
+    temperature: number
+    humidity: number
+    pressure: number
+}
 
-const WebSocketContext = createContext<ReturnType<typeof useWebSocketQuery> | null>(null)
+export interface WebSocketState {
+    data: SensorData | null
+    connected: boolean
+    loading: boolean
+    error: string | null
+    history: Array<SensorHistoryItem>
+}
+
+const WebSocketContext = createContext<WebSocketState | null>(null)
 
 export const WebSocketProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-    const wsState = useWebSocketQuery(WS_URL)
+    const wsState = useWebSocketQuery('ws://127.0.0.1:3000')
     return (
         <WebSocketContext.Provider value={wsState}>
             {children}
