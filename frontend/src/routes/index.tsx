@@ -1,5 +1,13 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { CalendarSync, CloudOff, Droplet, Gauge, Thermometer, WindArrowDown } from 'lucide-react'
+import {
+  CalendarSync,
+  CloudOff,
+  Droplet,
+  Gauge,
+  Thermometer,
+  WindArrowDown,
+} from 'lucide-react'
+
 import SensorDataCard from '@/components/SensorDataCard/SensorDataCard'
 import SensorChartCard from '@/components/SensorChartCard/SensorChartCard'
 import SkeletonCard from '@/components/SkeletonLoaders/SkeletonCard'
@@ -13,10 +21,7 @@ export const Route = createFileRoute('/')({
 
 function App() {
   const { data, loading, error } = useWebSocket()
-  console.log(error)
-  console.log(loading)
-  console.log(data)
-  console.log('-----------------')
+  console.log(error, loading, data)
 
   return (
     <div className="bg-gray-50 py-6 min-h-screen px-6">
@@ -31,65 +36,97 @@ function App() {
             </span>
           </div>
         )}
-        {loading && !error && (<SkeletonLastUpdate />)}
-
-
+        {loading && <SkeletonLastUpdate />}
       </div>
 
       {/* 🔸 4 kafelki z danymi */}
       <div className="grid grid-cols-4 gap-6 mb-8">
-        {loading && !error && (<>
-          <SkeletonCard />
-          <SkeletonCard />
-          <SkeletonCard />
-          <SkeletonCard />
-        </>)}
-        {!loading && data && !error && (
+        {loading && (
           <>
-            <SensorDataCard type="temperature" value={data.temperature} icon={Thermometer} />
-            <SensorDataCard type="humidity" value={data.humidity} icon={Droplet} />
-            <SensorDataCard type="pressure" value={data.pressure} icon={Gauge} />
-            <SensorDataCard type="airQualityVoltage" value={data.voltage} icon={WindArrowDown} />
+            <SkeletonCard />
+            <SkeletonCard />
+            <SkeletonCard />
+            <SkeletonCard />
           </>
         )}
-
+        {!loading && data && !error && (
+          <>
+            <SensorDataCard
+              type="temperature"
+              value={data.temperature}
+              icon={Thermometer}
+            />
+            <SensorDataCard
+              type="humidity"
+              value={data.humidity}
+              icon={Droplet}
+            />
+            <SensorDataCard
+              type="pressure"
+              value={data.pressure}
+              icon={Gauge}
+            />
+            <SensorDataCard
+              type="airQualityVoltage"
+              value={data.voltage}
+              icon={WindArrowDown}
+            />
+          </>
+        )}
       </div>
 
       {/* 🔸 Wykresy */}
-      {!error && (
-        <div className="grid grid-cols-3 gap-6">
-          <div className="col-span-2 row-span-2 bg-white rounded-xl border border-gray-200 shadow-sm p-6 h-[500px]">
-            {!loading && data ? (
-              <SensorChartCard type="temperature" value={data.temperature} unit="°C" time={data.timestamp} />
-            ) : (
-              <SkeletonChart heightClass="h-full" spanClass="sm:col-span-2" />
-            )}
+      {loading && (
+        <div className="grid grid-cols-3 gap-6 auto-rows-fr min-h-[500px]">
+          {/* Duży skeleton */}
+          <div className="col-span-2 row-span-2">
+            <SkeletonChart heightClass="h-full" />
           </div>
+          {/* Dwa mniejsze skeletony */}
+          <SkeletonChart heightClass="h-[245px]" />
+          <SkeletonChart heightClass="h-[245px]" />
+        </div>
+      )}
 
-          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 h-[245px]">
-            {!loading && data ? (
-              <SensorChartCard type="humidity" value={data.humidity} unit="%" time={data.timestamp} />
-            ) : (
-              <SkeletonChart heightClass="h-full" spanClass="sm:col-span-1" />
-            )}
+      {!loading && data && !error && (
+        <div className="grid grid-cols-3 gap-6 auto-rows-fr min-h-[500px]">
+          {/* Duży wykres */}
+          <div className="col-span-2 row-span-2 bg-white rounded-xl border border-gray-200 shadow-sm p-6 flex flex-col">
+            <SensorChartCard
+              type="temperature"
+              value={data.temperature}
+              unit="°C"
+              time={data.timestamp}
+            />
           </div>
-
-          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 h-[245px]">
-            {!loading && data ? (
-              <SensorChartCard type="pressure" value={data.pressure} unit="hPa" time={data.timestamp} />
-            ) : (
-              <SkeletonChart heightClass="h-full" spanClass="sm:col-span-1" />
-            )}
+          {/* Dwa mniejsze wykresy */}
+          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 flex flex-col min-h-[245px]">
+            <SensorChartCard
+              type="humidity"
+              value={data.humidity}
+              unit="%"
+              time={data.timestamp}
+            />
+          </div>
+          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 flex flex-col min-h-[245px]">
+            <SensorChartCard
+              type="pressure"
+              value={data.pressure}
+              unit="hPa"
+              time={data.timestamp}
+            />
           </div>
         </div>
       )}
 
       {/* 🔸 Komunikat błędu */}
-      {error && !data && !loading && (
+      {error && !loading && (
         <div className="mt-12 text-center">
           <CloudOff className="w-16 h-16 text-red-500 mx-auto" />
           <p className="text-red-600 font-semibold mt-4">{error}</p>
-          <p className="text-gray-500 mt-1 text-sm">Sprawdź połączenie z serwerem lub siecią Wi-Fi.</p>
+          <p className="text-gray-500 mt-1 text-sm">
+            Sprawdź połączenie z serwerem lub siecią Wi-Fi.
+          </p>
         </div>
       )}
     </div>

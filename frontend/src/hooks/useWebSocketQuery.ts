@@ -27,7 +27,6 @@ export function useWebSocketQuery(url: string) {
     const timeoutRef = useRef<NodeJS.Timeout | null>(null)
     const reconnectRef = useRef<NodeJS.Timeout | null>(null)
     const hasEverConnected = useRef(false)
-
     const lastMessageTime = useRef<number>(0)
 
     const resetTimeout = () => {
@@ -60,11 +59,18 @@ export function useWebSocketQuery(url: string) {
                     const msg = JSON.parse(event.data)
                     if (msg.type === 'sensor_update') {
                         const newData: SensorData = { ...msg.payload, timestamp: msg.timestamp }
+
                         setData(newData)
-                        setHistory(prev => [
+                        setHistory((prev) => [
                             ...prev.slice(-49),
-                            { time: newData.timestamp, temperature: newData.temperature, humidity: newData.humidity, pressure: newData.pressure }
+                            {
+                                time: newData.timestamp,
+                                temperature: newData.temperature,
+                                humidity: newData.humidity,
+                                pressure: newData.pressure,
+                            },
                         ])
+
                         lastMessageTime.current = Date.now()
                         setError(null)
                         setLoading(false)
@@ -85,6 +91,7 @@ export function useWebSocketQuery(url: string) {
                 console.log('❌ Połączenie WebSocket zamknięte')
                 setConnected(false)
                 setLoading(false)
+
                 if (timeoutRef.current) clearInterval(timeoutRef.current)
 
                 if (hasEverConnected.current) {
