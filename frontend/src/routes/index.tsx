@@ -24,7 +24,7 @@ function App() {
   console.log(error, loading, data)
 
   return (
-    <div className="bg-gray-50 py-6 min-h-screen px-6">
+    <div className="bg-gray-50 py-6 min-h-screen">
       {/* 🔸 Pasek z ostatnią aktualizacją */}
       <div className="flex justify-between items-center mb-6">
         {!loading && data && !error && (
@@ -56,16 +56,8 @@ function App() {
               value={data.temperature}
               icon={Thermometer}
             />
-            <SensorDataCard
-              type="humidity"
-              value={data.humidity}
-              icon={Droplet}
-            />
-            <SensorDataCard
-              type="pressure"
-              value={data.pressure}
-              icon={Gauge}
-            />
+            <SensorDataCard type="humidity" value={data.humidity} icon={Droplet} />
+            <SensorDataCard type="pressure" value={data.pressure} icon={Gauge} />
             <SensorDataCard
               type="airQualityVoltage"
               value={data.voltage}
@@ -83,15 +75,15 @@ function App() {
             <SkeletonChart heightClass="h-full" />
           </div>
           {/* Dwa mniejsze skeletony */}
-          <SkeletonChart heightClass="h-[245px]" />
-          <SkeletonChart heightClass="h-[245px]" />
+          <SkeletonChart heightClass="h-[300px]" />
+          <SkeletonChart heightClass="h-[300px]" />
         </div>
       )}
 
       {!loading && data && !error && (
         <div className="grid grid-cols-3 gap-6 auto-rows-fr min-h-[500px]">
-          {/* Duży wykres */}
-          <div className="col-span-2 row-span-2 bg-white rounded-xl border border-gray-200 shadow-sm p-6 flex flex-col">
+          {/* Duży wykres – zmniejszony */}
+          <div className="col-span-2 row-span-2 bg-white rounded-xl border border-gray-200 shadow-sm p-4 flex flex-col min-h-[400px]">
             <SensorChartCard
               type="temperature"
               value={data.temperature}
@@ -99,8 +91,8 @@ function App() {
               time={data.timestamp}
             />
           </div>
-          {/* Dwa mniejsze wykresy */}
-          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 flex flex-col min-h-[245px]">
+          {/* Dwa większe mniejsze wykresy */}
+          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4 flex flex-col min-h-[300px]">
             <SensorChartCard
               type="humidity"
               value={data.humidity}
@@ -108,7 +100,7 @@ function App() {
               time={data.timestamp}
             />
           </div>
-          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-6 flex flex-col min-h-[245px]">
+          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4 flex flex-col min-h-[300px]">
             <SensorChartCard
               type="pressure"
               value={data.pressure}

@@ -70,13 +70,21 @@ const SensorChartCard: React.FC<SensorChartCardProps> = ({ type, unit }) => {
                         label={{ value: 'Time', position: 'bottom', offset: 0, fill: '#4b5563', fontSize: 12 }}
                     />
                     <YAxis
+                        width={60}
                         tickFormatter={v => (v as number).toFixed(2)}
                         domain={['auto', 'auto']}
                         allowDecimals={true}
                         tick={{ fontSize: 12, fill: '#4b5563' }}
                         axisLine={{ stroke: '#9ca3af' }}
                         tickLine={{ stroke: '#d1d5db' }}
-                        label={{ value: `Value (${unit})`, angle: -90, position: 'insideLeft', fill: '#4b5563', fontSize: 12 }}
+                        label={{
+                            value: `Value`,
+                            angle: -90,
+                            position: 'insideLeft',
+                            fill: '#4b5563',
+                            fontSize: 12,
+                            offset: 5, // <-- zwiększamy offset zamiast dx/dy
+                        }}
                     />
                     <Tooltip
                         labelFormatter={label => new Date(label).toLocaleTimeString()}
