@@ -78,7 +78,7 @@ const SensorChartCard: React.FC<SensorChartCardProps> = ({ type, unit }) => {
                         axisLine={{ stroke: '#9ca3af' }}
                         tickLine={{ stroke: '#d1d5db' }}
                         label={{
-                            value: `Value`,
+                            value: unit,
                             angle: -90,
                             position: 'insideLeft',
                             fill: '#4b5563',
