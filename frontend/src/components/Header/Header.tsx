@@ -16,7 +16,7 @@ const Header = () => {
                         <div className="w-3.5 h-3.5 rounded-full bg-red-500 shadow-[0_0_8px_2px_rgba(239,68,68,0.5)]"></div>
                         <p className="text-red-700 font-medium text-sm">Dissconnected with sensors</p>
                     </div>)}
-                {loading && !data && (
+                {(loading || !data) && (
                     <div className="flex items-center gap-2 bg-amber-50 px-3 py-2 rounded-xl shadow-sm border border-amber-200">
                         <div className="w-3.5 h-3.5 rounded-full bg-amber-400 animate-pulse shadow-[0_0_8px_2px_rgba(251,191,36,0.5)]"></div>
                         <p className="text-amber-700 font-medium text-sm">Connecting...</p>

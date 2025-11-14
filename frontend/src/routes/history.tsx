@@ -4,6 +4,9 @@ export const Route = createFileRoute('/history')({
     component: History,
 })
 
+
+
+
 function History() {
     return (
         <div>

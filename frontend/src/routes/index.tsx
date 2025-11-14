@@ -21,13 +21,13 @@ export const Route = createFileRoute('/')({
 
 function App() {
   const { data, loading, error } = useWebSocket()
-  console.log(error, loading, data)
+  console.log(data, loading, error)
 
   return (
     <div className="bg-gray-50 py-6 min-h-screen">
       {/* 🔸 Pasek z ostatnią aktualizacją */}
       <div className="flex justify-between items-center mb-6">
-        {!loading && data && !error && (
+        {!loading && data && (
           <div className="flex items-center gap-2 text-sm text-gray-600 bg-white border border-gray-200 px-4 py-2 rounded-xl shadow-sm">
             <CalendarSync className="w-4 h-4 text-blue-500" />
             <span className="text-gray-500">Ostatnia aktualizacja:</span>
@@ -41,7 +41,7 @@ function App() {
 
       {/* 🔸 4 kafelki z danymi */}
       <div className="grid grid-cols-4 gap-6 mb-8">
-        {loading && (
+        {(loading || !data) && (
           <>
             <SkeletonCard />
             <SkeletonCard />
@@ -49,7 +49,7 @@ function App() {
             <SkeletonCard />
           </>
         )}
-        {!loading && data && !error && (
+        {!loading && data && (
           <>
             <SensorDataCard
               type="temperature"
@@ -68,7 +68,7 @@ function App() {
       </div>
 
       {/* 🔸 Wykresy */}
-      {loading && (
+      {(loading || !data) && (
         <div className="grid grid-cols-3 gap-6 auto-rows-fr min-h-[500px]">
           {/* Duży skeleton */}
           <div className="col-span-2 row-span-2">
@@ -80,7 +80,7 @@ function App() {
         </div>
       )}
 
-      {!loading && data && !error && (
+      {!loading && data && (
         <div className="grid grid-cols-3 gap-6 auto-rows-fr min-h-[500px]">
           {/* Duży wykres – zmniejszony */}
           <div className="col-span-2 row-span-2 bg-white rounded-xl border border-gray-200 shadow-sm p-4 flex flex-col min-h-[400px]">
@@ -112,7 +112,7 @@ function App() {
       )}
 
       {/* 🔸 Komunikat błędu */}
-      {error && !loading && (
+      {/* {error && !loading && (
         <div className="mt-12 text-center">
           <CloudOff className="w-16 h-16 text-red-500 mx-auto" />
           <p className="text-red-600 font-semibold mt-4">{error}</p>
@@ -120,7 +120,7 @@ function App() {
             Sprawdź połączenie z serwerem lub siecią Wi-Fi.
           </p>
         </div>
-      )}
+      )} */}
     </div>
   )
 }

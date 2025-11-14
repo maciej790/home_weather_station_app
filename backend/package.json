@@ -12,6 +12,7 @@
     "bonjour": "^3.5.0",
     "cors": "^2.8.5",
     "express": "^5.1.0",
+    "mysql2": "^3.15.3",
     "ws": "^8.18.3"
   },
   "devDependencies": {

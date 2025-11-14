@@ -2,7 +2,8 @@ const express = require('express');
 const cors = require('cors');
 const http = require('http');
 const WebSocket = require('ws');
-const dashboard = require('./routes/dashboard');
+const sensor_data = require('./routes/sensor_data');
+const startAggregation = require('./services/aggregator');
 
 const app = express();
 const port = 3000;
@@ -10,9 +11,11 @@ const port = 3000;
 // Middleware
 app.use(cors({ origin: "*", credentials: true }));
 app.use(express.json());
+// app.use(bufferMiddleware);
+
 
 // Routes
-app.use('/dashboard', dashboard);
+app.use('/sensor_data', sensor_data);
 
 // Server + WebSocket
 const server = http.createServer(app);
@@ -34,6 +37,8 @@ wss.on('connection', (ws) => {
 
 // Ustawiamy dostęp do WebSocketa w app
 app.set('wss', wss);
+
+startAggregation()
 
 // Prosty test endpoint
 app.get('/', (_, res) => res.send('Serwer działa!'));
