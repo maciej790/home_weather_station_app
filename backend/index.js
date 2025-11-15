@@ -4,6 +4,7 @@ const http = require('http');
 const WebSocket = require('ws');
 const sensor_data = require('./routes/sensor_data');
 const history = require('./routes/history');
+const norm = require('./routes/norm');
 const startAggregation = require('./services/aggregator');
 
 const app = express();
@@ -18,6 +19,7 @@ app.use(express.json());
 // Routes
 app.use('/sensor_data', sensor_data);
 app.use('/history', history);
+app.use('/norm', norm);
 
 // Server + WebSocket
 const server = http.createServer(app);
