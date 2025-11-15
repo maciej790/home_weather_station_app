@@ -1,16 +1,13 @@
-const mysql = require('mysql2');
+const mysql = require('mysql2/promise');
 
-const db = mysql.createConnection({
+const db = mysql.createPool({
   host: 'localhost',
   user: 'root',
   password: '',
   database: 'home_weather_station_app',
-});
-
-db.connect(err => {
-  if (err) {
-    console.error('❌ Błąd połączenia z MySQL:', err.message);
-  } 
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0
 });
 
 module.exports = db;

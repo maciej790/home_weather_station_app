@@ -3,6 +3,7 @@ const cors = require('cors');
 const http = require('http');
 const WebSocket = require('ws');
 const sensor_data = require('./routes/sensor_data');
+const history = require('./routes/history');
 const startAggregation = require('./services/aggregator');
 
 const app = express();
@@ -16,6 +17,7 @@ app.use(express.json());
 
 // Routes
 app.use('/sensor_data', sensor_data);
+app.use('/history', history);
 
 // Server + WebSocket
 const server = http.createServer(app);
