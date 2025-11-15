@@ -9,18 +9,15 @@ interface SensorDataCardProps {
 }
 
 const SensorDataCard: React.FC<SensorDataCardProps> = ({ type, value, icon: Icon }) => {
-    const { SENSOR_NORMS, getNormStatus } = useNormStatus()
+    const { SENSOR_NORMS, getNormStatus, getNormColor, loading } = useNormStatus();
 
-    const norm = SENSOR_NORMS[type]
-    const numericValue = typeof value === 'number' ? value : parseFloat(String(value))
-    const status = getNormStatus(numericValue, norm)
+    if (loading) return <div >Ładowanie...</div>;
 
-    const barColor =
-        status === 'critical'
-            ? 'bg-red-500'
-            : status === 'warning'
-                ? 'bg-yellow-500'
-                : 'bg-green-500'
+
+    const norm = SENSOR_NORMS[type];
+    const numericValue = typeof value === 'number' ? value : parseFloat(String(value));
+    const status = getNormStatus(numericValue, norm);
+    const barColor = getNormColor(status);
 
     const iconColorMap: Record<string, string> = {
         temperature: 'text-red-500 bg-red-50',
@@ -41,13 +38,13 @@ const SensorDataCard: React.FC<SensorDataCardProps> = ({ type, value, icon: Icon
     }
 
     return (
-        <div
-            className="
-        relative bg-white rounded-2xl shadow-sm border border-gray-100
-        p-12 flex flex-col justify-between transition-all duration-300
-        hover:shadow-md hover:-translate-y-0.5 overflow-hidden
-      "
-        >
+
+        <div className="
+  relative bg-white rounded-2xl border-gray-100
+  p-12 flex flex-col justify-between min-h-[180px]
+  transition-transform duration-300
+  hover:shadow-md hover:-translate-y-0.5 overflow-hidden
+">
             {/* 🔸 Pasek statusu u dołu */}
             <div
                 className={`absolute bottom-0 left-0 right-0 h-[6px] ${barColor}`}
