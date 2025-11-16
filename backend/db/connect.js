@@ -7,7 +7,8 @@ const db = mysql.createPool({
   database: 'home_weather_station_app',
   waitForConnections: true,
   connectionLimit: 10,
-  queueLimit: 0
+  queueLimit: 0,
+  timezone: '+01:00' // ustawiamy strefę czasową na Polskę
 });
 
 module.exports = db;

@@ -21,12 +21,9 @@ function historyQueryMiddleware(req, res, next) {
   let sql = "";
   let params = [];
 
-  // ------ PRESET RANGE ------
   if (range) {
     const interval = presets[range];
-    if (!interval) {
-      return res.status(400).json({ error: "Invalid range" });
-    }
+    if (!interval) return res.status(400).json({ error: "Invalid range" });
 
     sql = `
       SELECT ${column} 
@@ -34,12 +31,10 @@ function historyQueryMiddleware(req, res, next) {
       WHERE reading_at >= NOW() - INTERVAL ${interval}
       ORDER BY reading_at DESC
     `;
-
     req.historyQuery = { sql, params };
     return next();
   }
 
-  // ------ CUSTOM RANGE ------
   if (from && to) {
     sql = `
       SELECT ${column}
@@ -47,13 +42,11 @@ function historyQueryMiddleware(req, res, next) {
       WHERE reading_at BETWEEN ? AND ?
       ORDER BY reading_at DESC
     `;
-
     params = [from, to];
     req.historyQuery = { sql, params };
     return next();
   }
 
-  // ------ NO FILTERS → GET ALL ------
   sql = `
     SELECT ${column}
     FROM sensor_readings
@@ -64,6 +57,15 @@ function historyQueryMiddleware(req, res, next) {
   return next();
 }
 
+// Funkcja do konwersji dat po pobraniu danych (jeśli chcesz)
+function convertDatesToPolishTime(rows) {
+  return rows.map(row => ({
+    ...row,
+    reading_at: new Date(row.reading_at).toLocaleString('pl-PL', { timeZone: 'Europe/Warsaw' })
+  }));
+}
+
 module.exports = {
-  historyQueryMiddleware
+  historyQueryMiddleware,
+  convertDatesToPolishTime
 };
