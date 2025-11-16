@@ -1,7 +1,17 @@
 import { useEffect, useState } from "react";
 
 export function useNormStatus() {
-    const [normData, setNormData] = useState<{ norms?: Array<any> } | null>(null);
+    const defaultNorms = [
+        { optimal_min: 18, optimal_max: 25, warning_min: 15, warning_max: 30 }, // temp
+        { optimal_min: 40, optimal_max: 60, warning_min: 30, warning_max: 70 }, // humidity
+        { optimal_min: 990, optimal_max: 1020, warning_min: 970, warning_max: 1040 }, // pressure
+        { optimal_min: 0, optimal_max: 50, warning_min: 51, warning_max: 100 }, // AQI
+    ];
+
+    const [normData, setNormData] = useState<{ norms: Array<any> }>({
+        norms: defaultNorms
+    });
+
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -36,26 +46,26 @@ export function useNormStatus() {
         temperature: {
             label: 'Temperature',
             unit: '°C',
-            optimal: [normData?.norms[0]?.optimal_min, normData?.norms[0]?.optimal_max],
-            warning: [normData?.norms[0]?.warning_min, normData?.norms[0]?.warning_max],
+            optimal: [normData.norms[0].optimal_min, normData.norms[0].optimal_max],
+            warning: [normData.norms[0].warning_min, normData.norms[0].warning_max],
         },
         humidity: {
             label: 'Humidity',
             unit: '%',
-            optimal: [normData?.norms[1]?.optimal_min, normData?.norms[1]?.optimal_max],
-            warning: [normData?.norms[1]?.warning_min, normData?.norms[1]?.warning_max],
+            optimal: [normData.norms[1].optimal_min, normData.norms[1].optimal_max],
+            warning: [normData.norms[1].warning_min, normData.norms[1].warning_max],
         },
         pressure: {
             label: 'Air Pressure',
             unit: 'hPa',
-            optimal: [normData?.norms[2]?.optimal_min, normData?.norms[2]?.optimal_max],
-            warning: [normData?.norms[2]?.warning_min, normData?.norms[2]?.warning_max],
+            optimal: [normData.norms[2].optimal_min, normData.norms[2].optimal_max],
+            warning: [normData.norms[2].warning_min, normData.norms[2].warning_max],
         },
         airQualityVoltage: {
             label: 'Air Quality Index',
             unit: 'AQI',
-            optimal: [normData?.norms[3]?.optimal_min, normData?.norms[3]?.optimal_max],
-            warning: [normData?.norms[3]?.warning_min, normData?.norms[3]?.warning_max],
+            optimal: [normData.norms[3].optimal_min, normData.norms[3].optimal_max],
+            warning: [normData.norms[3].warning_min, normData.norms[3].warning_max],
         },
     };
 
