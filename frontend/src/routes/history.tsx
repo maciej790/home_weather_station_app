@@ -52,8 +52,9 @@ function History() {
     async function fetchChartData() {
         try {
             const query = getQuery();
+            console.log(query)
             const res = await fetch(
-                `http://localhost:3000/history?${query}` // duży limit, aby pobrać pełny trend
+                `http://localhost:3000/history?${query}&isChart=true`
             );
             const json = await res.json();
             setChartData(json.data ?? []);
@@ -147,7 +148,7 @@ function History() {
                         onPrev={() => setPage(prev => Math.max(1, prev - 1))}
                         onNext={() => setPage(prev => Math.min(totalPages, prev + 1))}
                     />
-                    {!loading && data.length > 0 && <HistoryChart data={data} />}
+                    {!loading && data.length > 0 && <HistoryChart data={chartData} />}
 
                 </>
             )}
