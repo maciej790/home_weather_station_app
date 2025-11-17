@@ -1,13 +1,40 @@
+import { useLocation } from "@tanstack/react-router";
 import { useWebSocketQuery } from "@/hooks/useWebSocketQuery";
 
 const Header = () => {
     const { data, loading, error } = useWebSocketQuery("ws://localhost:3000");
 
+    const location = useLocation()
+
+
+    const routeName = location.pathname.replace('/', '');
+    const formatted =
+        routeName
+            ? routeName.charAt(0).toUpperCase() + routeName.slice(1)
+            : 'Dashboard';
+
+    let routeDescription = ''
+
+    switch (routeName) {
+        case 'history':
+            routeDescription = 'View and analyze historical sensor data';
+            break;
+        case 'settings':
+            routeDescription = 'Configure application settings and preferences';
+            break;
+        case 'account':
+            routeDescription = 'Manage your user account and profile settings';
+            break;
+        default:
+            routeDescription = 'Real-time environmental sensors monitoring';
+            break;
+    }
+
     return (
         <div className="flex justify-between items-center fixed top-0 left-64 right-0 bg-white p-6 pl-10 shadow-md z-50 rounded-b-sm">
             <div className="flex flex-col">
-                <h2 className="text-2xl font-semibold">Dashboard</h2>
-                <p className="text-gray-500 text-sm">Real-time environmental sensors monitoring</p>
+                <h2 className="text-2xl font-semibold">{!routeName ? 'Dashboard' : formatted}</h2>
+                <p className="text-gray-500 text-sm">{routeDescription}</p>
             </div>
 
             <div className="flex items-center">

@@ -101,7 +101,6 @@ function History() {
 
     // Legenda norm – zawsze widoczna
     const NormLegend = () => {
-        if (type === 'all') return null;
 
         const normKeyMap: Record<string, string> = {
             temperature: 'temperature',
@@ -149,6 +148,9 @@ function History() {
                     onRangeSelect={handleRangeClick}
                     onCustomSearch={handleCustomSearch}
                 />
+
+                {/* Legenda norm pod formularzem */}
+                <NormLegend />
                 <div className="flex justify-end gap-2 mb-4">
                     <button
                         onClick={handleClearFilters}
@@ -164,8 +166,6 @@ function History() {
                     </button>
                 </div>
 
-                {/* Legenda norm pod formularzem */}
-                <NormLegend />
             </div>
 
             {loading ? (
