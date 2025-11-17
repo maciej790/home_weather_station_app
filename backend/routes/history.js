@@ -1,3 +1,4 @@
+// routes/history.js
 const express = require('express');
 const router = express.Router();
 const { historyQueryMiddleware, convertDatesToPolishTime } = require('../middleware/historyQueryMiddleware');
@@ -7,58 +8,47 @@ router.get('/', historyQueryMiddleware, async (req, res) => {
   try {
     const { sql, params } = req.historyQuery;
 
-    // Sprawdzamy, czy podano page i limit
-    const pageProvided = req.query.page !== undefined;
-    const limitProvided = req.query.limit !== undefined;
-
-    let rows, total, pages, count;
-
-    if (!pageProvided && !limitProvided) {
-      // Jeśli brak paginacji, pobieramy wszystkie rekordy
-      [rows] = await db.execute(sql, params);
+    // Wykres lub brak paginacji -> pobieramy wszystkie rekordy
+    if (req.query.isChart === 'true' || (req.query.page === undefined && req.query.limit === undefined)) {
+      const [rows] = await db.execute(sql, params);
       const convertedRows = convertDatesToPolishTime(rows);
-      total = convertedRows.length;
-      pages = 1;
-      count = total;
-
-      res.json({
+      return res.json({
         page: 1,
-        limit: total,
-        total,
-        pages,
-        count,
+        limit: convertedRows.length,
+        total: convertedRows.length,
+        pages: 1,
+        count: convertedRows.length,
         data: convertedRows
       });
-      return;
     }
 
-    // Jeśli są podane page/limit, stosujemy paginację
+    // ===============================
+    // Paginated table data
+    // ===============================
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 50;
     const offset = (page - 1) * limit;
 
     const countSql = `SELECT COUNT(*) AS total FROM (${sql}) AS sub`;
     const [countRows] = await db.execute(countSql, params);
-    total = countRows[0].total;
+    const total = countRows[0].total;
 
     const paginatedSql = `${sql} LIMIT ? OFFSET ?`;
     const paginatedParams = [...params, limit, offset];
-    [rows] = await db.execute(paginatedSql, paginatedParams);
-
+    const [rows] = await db.execute(paginatedSql, paginatedParams);
     const convertedRows = convertDatesToPolishTime(rows);
-    count = convertedRows.length;
 
     res.json({
       page,
       limit,
       total,
       pages: Math.ceil(total / limit),
-      count,
+      count: convertedRows.length,
       data: convertedRows
     });
 
   } catch (err) {
-    console.error("❌ Błąd pobierania danych historycznych:", err.message);
+    console.error("❌ Błąd pobierania danych historycznych:", err);
     res.status(500).json({ error: "Błąd serwera" });
   }
 });

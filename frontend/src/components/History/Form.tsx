@@ -1,3 +1,5 @@
+import { useEffect, useState } from "react";
+
 export default function Form({
     type,
     setType,
@@ -8,8 +10,14 @@ export default function Form({
     to,
     setTo,
     onRangeSelect,
-    onCustomSearch
+    onCustomSearch,
 }: any) {
+    // lokalny stan dla selecta, synchronizowany z rodzicem
+    const [localType, setLocalType] = useState(type);
+
+    useEffect(() => {
+        setLocalType(type);
+    }, [type]);
 
     const ranges = [
         { label: "1h", value: "1h" },
@@ -21,7 +29,6 @@ export default function Form({
 
     return (
         <div className="w-full grid grid-cols-1 lg:grid-cols-2 gap-6">
-
             {/* LEFT PANEL */}
             <div className="bg-white p-6 rounded-2xl shadow-md border border-gray-200">
                 <h2 className="text-xl font-semibold mb-4 text-gray-800">Quick Filters</h2>
@@ -31,13 +38,16 @@ export default function Form({
                     <label className="block font-medium text-gray-700 mb-2">Sensor type</label>
                     <select
                         className="border border-gray-300 rounded-xl p-3 w-full bg-gray-50 focus:ring-2 focus:ring-blue-400"
-                        value={type}
-                        onChange={(e) => setType(e.target.value)}
+                        value={localType}
+                        onChange={(e) => {
+                            setLocalType(e.target.value); // aktualizacja lokalna
+                            setType(e.target.value); // aktualizacja w rodzicu
+                        }}
                     >
                         <option value="all">All sensors</option>
                         <option value="temperature">Temperature</option>
                         <option value="humidity">Humidity</option>
-                        <option value="pressure">Pressure</option>
+                        <option value="air_pressure">Pressure</option>
                         <option value="air_quality">Air Quality</option>
                     </select>
                 </div>
@@ -46,12 +56,12 @@ export default function Form({
                 <div>
                     <p className="font-medium text-gray-700 mb-3">Quick ranges</p>
                     <div className="grid grid-cols-3 md:grid-cols-5 gap-3">
-                        {ranges.map(r => (
+                        {ranges.map((r) => (
                             <button
                                 key={r.value}
                                 onClick={() => onRangeSelect(r.value)}
                                 className={`px-4 py-3 rounded-xl text-sm font-medium transition-all shadow-sm border
-                                    ${range === r.value
+                    ${range === r.value
                                         ? "bg-blue-600 text-white border-blue-600"
                                         : "bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200"}`}
                             >
