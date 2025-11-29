@@ -40,6 +40,8 @@ export default function StatsPanel({ data, type }: StatsPanelProps) {
         .map(r => r[dataKey])
         .filter(v => typeof v === "number");
 
+    console.log(values)
+
     if (values.length === 0) return null;
 
     const min = Math.min(...values);

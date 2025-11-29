@@ -1,11 +1,13 @@
 const express = require('express');
 const cors = require('cors');
 const http = require('http');
+const bodyParser = require('body-parser');
 const WebSocket = require('ws');
 const sensor_data = require('./routes/sensor_data');
 const history = require('./routes/history');
 const norm = require('./routes/norm');
 const startAggregation = require('./services/aggregator');
+const auth = require('./routes/auth');
 
 const app = express();
 const port = 3000;
@@ -13,6 +15,7 @@ const port = 3000;
 // Middleware
 app.use(cors({ origin: "*", credentials: true }));
 app.use(express.json());
+app.use(bodyParser.json())
 // app.use(bufferMiddleware);
 
 
@@ -20,6 +23,7 @@ app.use(express.json());
 app.use('/sensor_data', sensor_data);
 app.use('/history', history);
 app.use('/norm', norm);
+app.use('/auth', auth);
 
 // Server + WebSocket
 const server = http.createServer(app);

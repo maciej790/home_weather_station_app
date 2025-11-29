@@ -7,9 +7,18 @@ import HistoryChart from '../components/History/HistoryChart';
 import StatsPanel from '../components/History/StatsPanel';
 import { useNormStatus } from '../hooks/useNormStatus';
 
+
+import ProtectedRoute from '@/components/ProtectedRoute'
+
+
+
 export const Route = createFileRoute('/history')({
-    component: History,
-});
+    component: () => (
+        <ProtectedRoute>
+            <History />
+        </ProtectedRoute>
+    ),
+})
 
 function History() {
     const { SENSOR_NORMS } = useNormStatus();

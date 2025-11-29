@@ -13,10 +13,15 @@ import SensorChartCard from '@/components/SensorChartCard/SensorChartCard'
 import SkeletonCard from '@/components/SkeletonLoaders/SkeletonCard'
 import SkeletonLastUpdate from '@/components/SkeletonLoaders/SkeletonLastUpdate'
 import SkeletonChart from '@/components/SkeletonLoaders/SkeletonChart'
+import ProtectedRoute from '@/components/ProtectedRoute'
 import { useWebSocket } from '@/context/WebSocketContext'
 
 export const Route = createFileRoute('/')({
-  component: App,
+  component: () => (
+    <ProtectedRoute>
+      <App />
+    </ProtectedRoute>
+  ),
 })
 
 function App() {
