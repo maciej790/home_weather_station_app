@@ -32,22 +32,22 @@ router.post(
 );
 
 // LOGIN
-router.post('/login', checkUserExistence(false), async (req, res) => {
-    const { password } = req.body;
+// router.post('/login', checkUserExistence(false), async (req, res) => {
+//     const { password } = req.body;
 
-    if (!password) return res.status(400).json('Wypełnij wszystkie pola!');
+//     if (!password) return res.status(400).json('Wypełnij wszystkie pola!');
 
-    const isMatch = await bcrypt.compare(password, req.user.password);
-    if (!isMatch) return res.status(401).json('Błędny login lub hasło!');
+//     const isMatch = await bcrypt.compare(password, req.user.password);
+//     if (!isMatch) return res.status(401).json('Błędny login lub hasło!');
 
-    const token = jwt.sign(
-        { userId: req.user.user_id, username: req.user.login },
-        SECRET_KEY,
-        { expiresIn: '24h' }
-    );
+//     const token = jwt.sign(
+//         { userId: req.user.user_id, username: req.user.login },
+//         SECRET_KEY,
+//         { expiresIn: '24h' }
+//     );
 
-    res.status(200).json({ token });
-});
+//     res.status(200).json({ token });
+// });
 
 
 
