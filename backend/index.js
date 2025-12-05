@@ -9,6 +9,7 @@ const norm = require('./routes/norm');
 const startAggregation = require('./services/aggregator');
 const auth = require('./routes/auth');
 const alerts = require('./routes/alerts')
+const user = require('./routes/user')
 
 const app = express();
 const port = 3000;
@@ -26,6 +27,7 @@ app.use('/history', history);
 app.use('/norm', norm);
 app.use('/auth', auth);
 app.use('/alerts', alerts)
+app.use('/user', user)
 
 // Server + WebSocket
 const server = http.createServer(app);

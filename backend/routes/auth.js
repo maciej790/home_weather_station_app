@@ -67,13 +67,15 @@ router.post('/login', checkUserExistence(false), async (req, res) =>{
     const continent = req.user.continent;
     const country = req.user.country;
     const locality = req.user.locality;
+    const flat_name = req.user.flat_name;
 
     const user = {
       userId,
       username,
       continent,
       country,
-      locality
+      locality,
+      flat_name
     }
 
     console.log(user)
