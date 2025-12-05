@@ -68,6 +68,7 @@ router.post('/login', checkUserExistence(false), async (req, res) =>{
     const country = req.user.country;
     const locality = req.user.locality;
     const flat_name = req.user.flat_name;
+    const isEmailSubscribe = req.user.isEmailSubscribe
 
     const user = {
       userId,
@@ -75,7 +76,8 @@ router.post('/login', checkUserExistence(false), async (req, res) =>{
       continent,
       country,
       locality,
-      flat_name
+      flat_name,
+      isEmailSubscribe
     }
 
     console.log(user)

@@ -63,10 +63,11 @@ export default function Settings() {
                 country,
                 locality: user.user.locality,
                 flat_name: user.user.flat_name,
+                isEmailSubscribe: user.user.isEmailSubscribe || 0 // <- pobieramy z backendu
             });
-
         }
     }, [user]);
+
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         setForm(prev => ({ ...prev, [e.target.name]: e.target.value }));
@@ -213,47 +214,33 @@ export default function Settings() {
                             onChange={handleChange}
                             className="p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 w-full"
                         />
+                        {/* Switcher dla subskrypcji email */}
+                        <div className="flex items-center mt-4">
+                            <label className="mr-3 text-gray-700 font-medium">Subscribe to email:</label>
+                            <button
+                                type="button"
+                                onClick={() =>
+                                    setForm(prev => ({
+                                        ...prev,
+                                        isEmailSubscribe: prev.isEmailSubscribe ? 0 : 1
+                                    }))
+                                }
+                                className={`w-12 h-6 flex items-center rounded-full p-1 transition-colors duration-300 ${form.isEmailSubscribe ? 'bg-blue-600' : 'bg-gray-300'
+                                    }`}
+                            >
+                                <div
+                                    className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-300 ${form.isEmailSubscribe ? 'translate-x-6' : 'translate-x-0'
+                                        }`}
+                                ></div>
+                            </button>
+                        </div>
+
+
+
+
                     </div>
 
-                    {/* Norms */}
 
-
-                    {/* <div className="flex-50 flex flex-col gap-6 bg-gray-50 p-6 rounded-2xl shadow-inner">
-                        <h2 className="text-xl font-semibold mb-4 text-gray-700 border-b pb-2">Norms</h2>
-
-                        {norms && Object.keys(norms).map(sensor => {
-                            const sensorData = norms[sensor];
-
-                            return (
-                                <div key={sensor} className="mb-6">
-                                    <p className="font-medium capitalize mb-2">{sensorData.label}</p>
-
-                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                                        {['optimal', 'warning'].map(type =>
-                                            [0, 1].map(i => (
-                                                <div key={`${sensor}-${type}-${i}`} className="flex flex-col">
-                                                    <label className="text-sm text-gray-500">{`${type}-${i === 0 ? 'min' : 'max'}`}</label>
-                                                    <input
-                                                        type="number"
-                                                        defaultValue={sensorData[type]?.[i] ?? ''}
-                                                        className={`p-3 border border-gray-300 rounded-xl focus:outline-none ${type === 'optimal' ? 'focus:ring-2 focus:ring-green-400' :
-                                                            'focus:ring-2 focus:ring-yellow-400'
-                                                            } w-full`}
-                                                    />
-                                                </div>
-                                            ))
-                                        )}
-                                    </div>
-
-                                    <p className="text-xs text-gray-400 mt-1">
-                                        Range: optimal [{sensorData.optimal[0]} - {sensorData.optimal[1]}],
-                                        warning [{sensorData.warning[0]} - {sensorData.warning[1]}]
-                                    </p>
-                                </div>
-                            );
-                        })}
-                        {console.log(norms)}
-                    </div> */}
                     <div className="flex-50 flex flex-col gap-6 bg-gray-50 p-6 rounded-2xl shadow-inner">
                         <h2 className="text-xl font-semibold mb-4 text-gray-700 border-b pb-2">Norms</h2>
 
