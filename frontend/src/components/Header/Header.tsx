@@ -6,6 +6,7 @@ const Header = () => {
     const { data, loading, error } = useWebSocketQuery("ws://localhost:3000");
     const location = useLocation();
     const { user, logout } = useAuth(); // <-- pobieramy użytkownika i funkcję logout
+    console.log(user)
 
     const routeName = location.pathname.replace('/', '');
     const formatted =
@@ -63,12 +64,12 @@ const Header = () => {
                 {/* Wyświetlenie zalogowanego użytkownika */}
                 {user && (
                     <div className="flex items-center gap-2 bg-blue-50 px-3 py-2 rounded-xl shadow-sm border border-blue-200">
-                        <p className="text-blue-700 font-medium text-sm">Hi, {user.username}</p>
+                        <p className="text-blue-700 font-medium text-sm">Hi, {user.user.username}</p>
                         <button
                             onClick={logout}
-                            className="ml-2 px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm"
+                            className=" rounded-2xl ml-2 px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600 text-sm"
                         >
-                            Wyloguj
+                            Logout
                         </button>
                     </div>
                 )}

@@ -60,13 +60,23 @@ router.post('/login', checkUserExistence(false), async (req, res) =>{
     const isPasswordMatch = await bcrypt.compare(password, hashedPassword);
     if (!isPasswordMatch) return res.status(401).json('Błędny login lub hasło!');
 
+
+
     const userId = req.user.user_id;
-    const username = req.user.login
+    const username = req.user.login;
+    const continent = req.user.continent;
+    const country = req.user.country;
+    const locality = req.user.locality;
 
     const user = {
       userId,
       username,
+      continent,
+      country,
+      locality
     }
+
+    console.log(user)
 
     const token = jwt.sign({user}, SECRET_KEY);
 

@@ -1,4 +1,4 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, useLocation } from '@tanstack/react-router'
 import {
   CalendarSync,
   CloudOff,
@@ -8,6 +8,7 @@ import {
   WindArrowDown,
 } from 'lucide-react'
 
+import { useEffect, useMemo } from 'react'
 import SensorDataCard from '@/components/SensorDataCard/SensorDataCard'
 import SensorChartCard from '@/components/SensorChartCard/SensorChartCard'
 import SkeletonCard from '@/components/SkeletonLoaders/SkeletonCard'
@@ -15,6 +16,9 @@ import SkeletonLastUpdate from '@/components/SkeletonLoaders/SkeletonLastUpdate'
 import SkeletonChart from '@/components/SkeletonLoaders/SkeletonChart'
 import ProtectedRoute from '@/components/ProtectedRoute'
 import { useWebSocket } from '@/context/WebSocketContext'
+import { useElevation } from '@/hooks/useElevation'
+import { useNormStatus } from '@/hooks/useNormStatus'
+import { useAuth } from '@/context/AuthContext'
 
 export const Route = createFileRoute('/')({
   component: () => (
@@ -26,16 +30,84 @@ export const Route = createFileRoute('/')({
 
 function App() {
   const { data, loading, error } = useWebSocket()
-  console.log(data, loading, error)
+  const { elevation } = useElevation()
+  const { SENSOR_NORMS, getNormStatus } = useNormStatus();
+  const { user } = useAuth()
+
+
+
+  const processedData = useMemo(() => {
+    if (!data) return null;
+    if (!elevation) return null; // czekamy na wyliczenie elewacji
+
+    return {
+      ...data,
+
+      // temperatura, wilgotność i napięcie BEZ zmian
+      temperature: Number(data.temperature.toFixed(1)),
+      humidity: Math.round(data.humidity),
+      voltage: Number((data.voltage * 100).toFixed(0)),
+
+      // 🔽 Oryginalne ciśnienie (BME280)
+      pressure: Number(data.pressure.toFixed(0)),
+
+      // 🔥 Nowe pole – ciśnienie zredukowane do poziomu morza (QNH)
+      pressureQNH: Number(
+        (data.pressure / Math.pow(1 - elevation / 44330, 5.255)).toFixed(1)
+      ),
+    };
+  }, [data, elevation]);
+
+
+  useEffect(() => {
+    if (!processedData) return;
+
+    const alerts = [];
+
+    const checks = [
+      { key: 'temperature', value: processedData.temperature, norm: SENSOR_NORMS.temperature },
+      { key: 'humidity', value: processedData.humidity, norm: SENSOR_NORMS.humidity },
+      { key: 'pressure', value: processedData.pressureQNH, norm: SENSOR_NORMS.pressure },
+      { key: 'airQualityVoltage', value: processedData.voltage / 100, norm: SENSOR_NORMS.airQualityVoltage },
+    ];
+
+    checks.forEach(({ key, value, norm }) => {
+      if (value != null && norm) {
+        const status = getNormStatus(value, norm);
+        if (status === 'critical') {
+          alerts.push({
+            sensor: key,
+            value,
+            status,
+            timestamp: processedData.timestamp,
+          });
+        }
+      }
+    });
+
+    if (alerts.length > 0) {
+      fetch('http://localhost:3000/alerts/send_alert', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}` // <- Twój token JWT lub inny
+        },
+        // user.user.userId
+        body: JSON.stringify({ alerts }), // wysyłamy wszystkie w jednym body
+      }).catch(() => { });
+    }
+  }, [processedData, SENSOR_NORMS, getNormStatus]);
+
+
 
   return (
-    <div className="bg-gray-50 py-6 min-h-screen">
+    <div className="bg-gray-50 py-6 px-10">
       {/* 🔸 Pasek z ostatnią aktualizacją */}
       <div className="flex justify-between items-center mb-6">
         {!loading && data && (
           <div className="flex items-center gap-2 text-sm text-gray-600 bg-white border border-gray-200 px-4 py-2 rounded-xl shadow-sm">
             <CalendarSync className="w-4 h-4 text-blue-500" />
-            <span className="text-gray-500">Ostatnia aktualizacja:</span>
+            <span className="text-gray-500">Last reading:</span>
             <span className="font-medium text-gray-800">
               {new Date(data.timestamp).toLocaleString('pl-PL')}
             </span>
@@ -62,7 +134,7 @@ function App() {
               icon={Thermometer}
             />
             <SensorDataCard type="humidity" value={data.humidity} icon={Droplet} />
-            <SensorDataCard type="pressure" value={data.pressure} icon={Gauge} />
+            <SensorDataCard type="pressure" value={processedData?.pressureQNH} icon={Gauge} />
             <SensorDataCard
               type="airQualityVoltage"
               value={data.voltage}
@@ -86,9 +158,10 @@ function App() {
       )}
 
       {!loading && data && (
-        <div className="grid grid-cols-3 gap-6 auto-rows-fr min-h-[500px]">
-          {/* Duży wykres – zmniejszony */}
-          <div className="col-span-2 row-span-2 bg-white rounded-xl border border-gray-200 shadow-sm p-4 flex flex-col min-h-[400px]">
+        <div className="grid grid-cols-2 gap-6 min-h-[300px]">
+
+          {/* Wykres temperatury */}
+          <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4 flex flex-col min-h-[300px]">
             <SensorChartCard
               type="temperature"
               value={data.temperature}
@@ -96,7 +169,8 @@ function App() {
               time={data.timestamp}
             />
           </div>
-          {/* Dwa większe mniejsze wykresy */}
+
+          {/* Wykres wilgotności */}
           <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4 flex flex-col min-h-[300px]">
             <SensorChartCard
               type="humidity"
@@ -105,15 +179,22 @@ function App() {
               time={data.timestamp}
             />
           </div>
+
+          {/* 
+
           <div className="bg-white rounded-xl border border-gray-200 shadow-sm p-4 flex flex-col min-h-[300px]">
             <SensorChartCard
               type="pressure"
-              value={data.pressure}
               unit="hPa"
-              time={data.timestamp}
+              valueKey="pressureQNH"  // wykres korzysta z przeliczonego ciśnienia
+              time={processedData?.timestamp}
             />
-          </div>
+          </div> */}
+
+
+
         </div>
+
       )}
 
       {/* 🔸 Komunikat błędu */}

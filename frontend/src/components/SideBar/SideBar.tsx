@@ -8,7 +8,7 @@ const SideBar = () => {
         { name: 'Dashboard', icon: <ChartLine size={20} />, link: '/' },
         { name: 'History', icon: <History size={20} />, link: '/history' },
         { name: 'Settings', icon: <Settings size={20} />, link: '/settings' },
-        { name: 'Account', icon: <User size={20} />, link: '/account' },
+        // { name: 'Account', icon: <User size={20} />, link: '/account' },
     ];
 
     return (

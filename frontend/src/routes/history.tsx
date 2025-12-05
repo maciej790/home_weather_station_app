@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { createFileRoute } from '@tanstack/react-router';
 import Form from '../components/History/Form';
 import Results from '../components/History/Results';
@@ -61,6 +61,7 @@ function History() {
         try {
             const query = getQuery();
             const res = await fetch(`http://localhost:3000/history?${query}&page=${pageNum}&limit=${limit}`);
+            console.log(res)
             const json = await res.json();
             setData(json.data ?? []);
             setTotalPages(json.pages || 1);
@@ -68,6 +69,9 @@ function History() {
             setLoading(false);
         }
     }
+
+
+
 
     async function fetchChartData() {
         try {

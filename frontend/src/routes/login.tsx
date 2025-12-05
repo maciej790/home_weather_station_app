@@ -1,17 +1,11 @@
 // src/pages/Login.tsx
-import React, { useState } from 'react'
-import { createFileRoute, useNavigate } from '@tanstack/react-router'
-
-import { useAuth } from '@/context/AuthContext'
-
-
-
-
-
+import React, { useState } from 'react';
+import { createFileRoute, useNavigate } from '@tanstack/react-router';
+import { useAuth } from '@/context/AuthContext';
 
 export const Route = createFileRoute('/login')({
     component: Login,
-})
+});
 
 export default function Login() {
     const { login } = useAuth();
@@ -41,14 +35,15 @@ export default function Login() {
     };
 
     return (
-        <div className="flex items-center justify-center min-h-screen bg-gray-100">
+        <div className="min-h-screen flex items-center justify-center bg-gradient-to-tr from-blue-400 to-purple-500">
             <form
                 onSubmit={handleSubmit}
-                className="bg-white p-8 rounded-xl shadow-md w-96 flex flex-col gap-3"
+                className="bg-white p-10 rounded-2xl shadow-xl w-96 flex flex-col gap-6"
             >
-                <h1 className="text-2xl font-bold mb-6">Logowanie</h1>
+                <h1 className="text-3xl font-bold text-center text-gray-800">Sign in</h1>
+                <p className="text-center text-gray-500">Type your login and password</p>
 
-                {error && <p className="text-red-500">{error}</p>}
+                {error && <p className="text-red-500 text-sm text-center">{error}</p>}
 
                 <input
                     type="text"
@@ -56,7 +51,7 @@ export default function Login() {
                     placeholder="Login"
                     value={form.login}
                     onChange={handleChange}
-                    className="p-2 border rounded"
+                    className="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
                 />
                 <input
                     type="password"
@@ -64,24 +59,23 @@ export default function Login() {
                     placeholder="Hasło"
                     value={form.password}
                     onChange={handleChange}
-                    className="p-2 border rounded"
+                    className="p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
                 />
 
                 <button
                     type="submit"
-                    className="bg-blue-500 text-white p-2 rounded hover:bg-blue-600 mt-2"
+                    className="bg-blue-500 text-white py-3 rounded-lg font-semibold hover:bg-blue-600 transition"
                 >
-                    Zaloguj się
+                    Sign in
                 </button>
 
-                {/* 🔹 Przycisk do przejścia do rejestracji */}
-                <p className="mt-4 text-sm text-gray-600 text-center">
-                    Nie masz konta?{' '}
+                <p className="text-sm text-gray-600 text-center mt-4">
+                    If You don't have an account click here{' '}
                     <span
                         className="text-blue-500 hover:underline cursor-pointer"
                         onClick={() => navigate({ to: '/register' })}
                     >
-                        Zarejestruj się
+                        Sign up
                     </span>
                 </p>
             </form>

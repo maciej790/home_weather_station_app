@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { useAuth } from '@/context/AuthContext'
 
 export interface SensorData {
     temperature: number
@@ -17,6 +18,7 @@ export interface SensorHistoryItem {
 }
 
 export function useWebSocketQuery(url: string) {
+    const { user } = useAuth();
     const [data, setData] = useState<SensorData | null>(null)
     const [connected, setConnected] = useState(false)
     const [loading, setLoading] = useState(true)
@@ -76,7 +78,7 @@ export function useWebSocketQuery(url: string) {
                         setLoading(false)
                     }
                 } catch {
-                    console.warn('⚠️ Nieprawidłowe dane z serwera.')
+                    console.warn('Not corrected data!.')
                 }
             }
 

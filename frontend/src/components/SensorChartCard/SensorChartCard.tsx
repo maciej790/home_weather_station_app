@@ -1,4 +1,3 @@
-// src/components/SensorChartCard/SensorChartCard.tsx
 import {
     CartesianGrid,
     LineChart,
@@ -14,12 +13,13 @@ import { useWebSocket } from '@/context/WebSocketContext'
 interface SensorChartCardProps {
     type: 'temperature' | 'humidity' | 'pressure'
     unit: string
+    valueKey?: string // nowy props: nazwa właściwości w history
 }
 
 const MAX_POINTS = 50
 const REFRESH_INTERVAL = 2000 // maks. 2 s
 
-const SensorChartCard: React.FC<SensorChartCardProps> = ({ type, unit }) => {
+const SensorChartCard: React.FC<SensorChartCardProps> = ({ type, unit, valueKey }) => {
     const { history } = useWebSocket()
     const [visibleData, setVisibleData] = useState<Array<{ time: string; value: number }>>([])
     const lastUpdateRef = useRef<number>(0)
@@ -31,8 +31,11 @@ const SensorChartCard: React.FC<SensorChartCardProps> = ({ type, unit }) => {
 
         setVisibleData(prev => {
             const filtered = history.reduce((acc: Array<{ time: string; value: number }>, item, index) => {
-                if (index === 0 || item[type] !== history[index - 1][type]) {
-                    acc.push({ time: item.time, value: item[type] })
+                const val = valueKey ? item[valueKey] : item[type]
+                const prevVal = index > 0 ? (valueKey ? history[index - 1][valueKey] : history[index - 1][type]) : null
+
+                if (index === 0 || val !== prevVal) {
+                    acc.push({ time: item.time, value: val })
                 }
                 return acc
             }, []).slice(-MAX_POINTS)
@@ -42,7 +45,7 @@ const SensorChartCard: React.FC<SensorChartCardProps> = ({ type, unit }) => {
             }
             return prev
         })
-    }, [history, type])
+    }, [history, type, valueKey])
 
     const color =
         type === 'temperature' ? '#f87171' : type === 'humidity' ? '#60a5fa' : '#34d399'
@@ -51,7 +54,6 @@ const SensorChartCard: React.FC<SensorChartCardProps> = ({ type, unit }) => {
 
     return (
         <div className="flex flex-col h-full">
-            {/* Podpis wykresu z jednostką */}
             <h3 className="text-gray-700 font-semibold mb-2">
                 {typeLabel} ({unit})
             </h3>
@@ -83,7 +85,7 @@ const SensorChartCard: React.FC<SensorChartCardProps> = ({ type, unit }) => {
                             position: 'insideLeft',
                             fill: '#4b5563',
                             fontSize: 12,
-                            offset: 5, // <-- zwiększamy offset zamiast dx/dy
+                            offset: 5,
                         }}
                     />
                     <Tooltip

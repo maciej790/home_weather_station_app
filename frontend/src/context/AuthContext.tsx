@@ -39,14 +39,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Logowanie
     const login = async (loginInput: string, password: string) => {
         const res = await axios.post('http://localhost:3000/auth/login', { login: loginInput, password });
-        const token = res.data.token;
+        const token = res.data;
         localStorage.setItem('token', token);
         setToken(token);
 
         const userRes = await axios.get('http://localhost:3000/auth/logged', {
             headers: { Authorization: `Bearer ${token}` },
         });
-        setUser(userRes.data);
+        setUser(userRes.data.user);
     };
 
     // Wylogowanie

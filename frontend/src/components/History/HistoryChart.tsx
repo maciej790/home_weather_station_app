@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
     CartesianGrid,
     Legend,
@@ -11,46 +11,54 @@ import {
     YAxis
 } from 'recharts';
 import { useNormStatus } from '../../hooks/useNormStatus';
-import type {
-    DotProps
-} from 'recharts';
+import type { DotProps } from 'recharts';
+import { useElevation } from '@/hooks/useElevation';
 
 interface HistoryChartProps {
     data: Array<Record<string, any>>;
 }
 
-export default function HistoryChart({ data }: HistoryChartProps) {
+export default function HistoryChart({ data: rawData }: HistoryChartProps) {
     const { SENSOR_NORMS, getNormStatus } = useNormStatus();
+    const { elevation } = useElevation();
+
+    // Mapowanie danych z uwzględnieniem pressureQNH
+    const data = useMemo(() => {
+        if (!rawData || rawData.length === 0) return [];
+        if (elevation === null || elevation === undefined) return rawData;
+
+        return rawData.map((item, index) => ({
+            ...item,
+            _index: index,
+            pressureQNH: item.air_pressure
+                ? Number((item.air_pressure / Math.pow(1 - elevation / 44330, 5.255)).toFixed(1))
+                : null,
+        }));
+    }, [rawData, elevation]);
 
     if (!data || data.length === 0) {
         return <p className="text-gray-500 mt-4 text-center">No data for chart</p>;
     }
 
-    // lista sensorów i powiązanych kolorów
     const sensors = [
         { dataKey: 'temperature', normKey: 'temperature', color: '#22c55e' },
         { dataKey: 'humidity', normKey: 'humidity', color: '#3b82f6' },
-        { dataKey: 'air_pressure', normKey: 'pressure', color: '#f97316' },
+        { dataKey: 'pressureQNH', normKey: 'pressure', color: '#f97316' }, // teraz korzystamy z pressureQNH
         { dataKey: 'air_quality', normKey: 'airQualityVoltage', color: '#e11d48' },
     ];
 
-    // CustomDot: kolor wg statusu normy
     const CustomDot: React.FC<DotProps & { normKey: string }> = (props) => {
         const { cx, cy, payload, dataKey, normKey } = props as any;
         if (cx == null || cy == null || !payload) return null;
         const value = payload[dataKey];
         if (value == null) return null;
         const norm = SENSOR_NORMS[normKey];
-        if (!norm) return <circle cx={cx} cy={cy} r={3} fill="#8884d8" />;
-        const status = getNormStatus(value, norm);
+        const status = norm ? getNormStatus(value, norm) : 'unknown';
         const fill = status === 'optimal' ? '#22c55e' : status === 'warning' ? '#eab308' : '#ef4444';
         return <circle cx={cx} cy={cy} r={3} fill={fill} stroke="none" />;
     };
 
-
-    // CustomTooltip: pokazuje wszystkie wartości i statusy
     const CustomTooltip = ({ active, payload, label }: any) => {
-
         if (!active || !payload || payload.length === 0) return null;
         return (
             <div className="p-2 bg-white border shadow rounded-md">
@@ -61,7 +69,6 @@ export default function HistoryChart({ data }: HistoryChartProps) {
                     const norm = SENSOR_NORMS[normKey];
                     const value = p.value;
                     const status = norm ? getNormStatus(value, norm) : 'unknown';
-
                     const color =
                         status === 'optimal'
                             ? 'text-green-600'
@@ -82,9 +89,7 @@ export default function HistoryChart({ data }: HistoryChartProps) {
                 })}
             </div>
         );
-
     };
-
 
     return (
         <div className="mt-8 w-full h-96 bg-white p-4 rounded-2xl shadow-md border border-gray-200">
@@ -95,7 +100,6 @@ export default function HistoryChart({ data }: HistoryChartProps) {
                     <YAxis />
                     <Tooltip content={<CustomTooltip />} />
                     <Legend />
-
                     {sensors.map(({ dataKey, normKey, color }) => {
                         const hasData = data.some(r => r[dataKey] != null);
                         const norm = SENSOR_NORMS[normKey];
