@@ -4,16 +4,16 @@ const db = require('../db/connect'); // Twój moduł z mysql2
 const checkToken = require('../middleware/checkToken');
 
 router.put('/settings', checkToken, async (req, res) => {
-    const { login, continent, country, locality, flat_name, norms, isEmailSubscribe } = req.body;
+    const { login, continent, country, locality, flat_name, norms } = req.body;
     const userId = req.user.user.userId; // zakładam, że middleware checkToken ustawia req.user
 
     try {
         // 1️⃣ Aktualizacja użytkownika razem z isEmailSubscribe
         await db.execute(
             `UPDATE users 
-             SET login = ?, continent = ?, country = ?, locality = ?, flat_name = ?, isEmailSubscribe = ?
+             SET login = ?, continent = ?, country = ?, locality = ?, flat_name = ?
              WHERE user_id = ?`,
-            [login, continent, country, locality, flat_name, isEmailSubscribe, userId]
+            [login, continent, country, locality, flat_name, userId]
         );
 
         // 2️⃣ Aktualizacja norm

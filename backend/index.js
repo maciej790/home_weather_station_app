@@ -8,7 +8,6 @@ const history = require('./routes/history');
 const norm = require('./routes/norm');
 const startAggregation = require('./services/aggregator');
 const auth = require('./routes/auth');
-const alerts = require('./routes/alerts')
 const user = require('./routes/user')
 
 const app = express();
@@ -26,7 +25,6 @@ app.use('/sensor_data', sensor_data);
 app.use('/history', history);
 app.use('/norm', norm);
 app.use('/auth', auth);
-app.use('/alerts', alerts)
 app.use('/user', user)
 
 // Server + WebSocket

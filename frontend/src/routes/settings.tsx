@@ -214,26 +214,7 @@ export default function Settings() {
                             onChange={handleChange}
                             className="p-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-400 w-full"
                         />
-                        {/* Switcher dla subskrypcji email */}
-                        <div className="flex items-center mt-4">
-                            <label className="mr-3 text-gray-700 font-medium">Subscribe to email:</label>
-                            <button
-                                type="button"
-                                onClick={() =>
-                                    setForm(prev => ({
-                                        ...prev,
-                                        isEmailSubscribe: prev.isEmailSubscribe ? 0 : 1
-                                    }))
-                                }
-                                className={`w-12 h-6 flex items-center rounded-full p-1 transition-colors duration-300 ${form.isEmailSubscribe ? 'bg-blue-600' : 'bg-gray-300'
-                                    }`}
-                            >
-                                <div
-                                    className={`bg-white w-4 h-4 rounded-full shadow-md transform transition-transform duration-300 ${form.isEmailSubscribe ? 'translate-x-6' : 'translate-x-0'
-                                        }`}
-                                ></div>
-                            </button>
-                        </div>
+
 
 
 

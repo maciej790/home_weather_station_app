@@ -31,8 +31,7 @@ export const Route = createFileRoute('/')({
 function App() {
   const { data, loading, error } = useWebSocket()
   const { elevation } = useElevation()
-  const { SENSOR_NORMS, getNormStatus } = useNormStatus();
-  const { user } = useAuth()
+
 
 
 
@@ -59,44 +58,6 @@ function App() {
   }, [data, elevation]);
 
 
-  useEffect(() => {
-    if (!processedData) return;
-
-    const alerts = [];
-
-    const checks = [
-      { key: 'temperature', value: processedData.temperature, norm: SENSOR_NORMS.temperature },
-      { key: 'humidity', value: processedData.humidity, norm: SENSOR_NORMS.humidity },
-      { key: 'pressure', value: processedData.pressureQNH, norm: SENSOR_NORMS.pressure },
-      { key: 'airQualityVoltage', value: processedData.voltage / 100, norm: SENSOR_NORMS.airQualityVoltage },
-    ];
-
-    checks.forEach(({ key, value, norm }) => {
-      if (value != null && norm) {
-        const status = getNormStatus(value, norm);
-        if (status === 'critical') {
-          alerts.push({
-            sensor: key,
-            value,
-            status,
-            timestamp: processedData.timestamp,
-          });
-        }
-      }
-    });
-
-    if (alerts.length > 0) {
-      fetch('http://localhost:3000/alerts/send_alert', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}` // <- Twój token JWT lub inny
-        },
-        // user.user.userId
-        body: JSON.stringify({ alerts }), // wysyłamy wszystkie w jednym body
-      }).catch(() => { });
-    }
-  }, [processedData, SENSOR_NORMS, getNormStatus]);
 
 
 
